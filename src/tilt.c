@@ -1,13 +1,13 @@
 #include "sim.h"
 
-int init_t(){
-    return 0;
+int init_t(pi_i2c_t* gyro){
+    if (configureAccelGyro(gyro));
+        return 0;
+    return 1;
 }
 
-int update_t(){
-    return 0;
-}
 
-int close_t(){
+int close_t(pi_i2c_t* gyro){
+    freei2cDevice(gyro);
     return 0;
 }

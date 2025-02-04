@@ -3,6 +3,7 @@
 #include <math.h>
 #include <time.h>
 #include "../config.h"
+#include "sense.h"
 
 //main funcs
 
@@ -21,6 +22,5 @@ int init_d();
 int close_d();
 
 //tilt funcs
-int init_t();
-int update_t();
+int init_t(pi_i2c_t* gyro);
 int close_t();

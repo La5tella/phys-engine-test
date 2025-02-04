@@ -2,9 +2,15 @@
 
 int running = 1;
 
+void interrupt_handler(int sig){
+    running = 0;
+}
 int main(){
     //init funcs
-    if (init_d() || init_p() || init_t()) {
+    signal(SIGINT, interrupt_handler);
+    coordinate_t data = {0,0,0};
+    pi_i2c_t* gyro = geti2cDevice();
+    if (init_d() || init_p() || init_t(&gyro) || !gyro){ {
         printf("init error\n");
         return 1;
     }
@@ -18,8 +24,8 @@ int main(){
         //update funcs
         update_d();
         update_p();
-        update_t();
-        printf("update\n");
+        getGyroPosition(&gyro, &data);
+        printf("Gyro: %f %f %f\n", data.x, data.y, data.z);
         nanosleep(&ts,NULL);
         
         
