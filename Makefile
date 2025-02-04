@@ -6,7 +6,7 @@ sim: main.o display.o physics.o tilt.o
 	cc -g -o sim main.o display.o tilt.o physics.o $(LDFLAGS)
 
 clean:
-	rm -f *.o final
+	rm -f *.o sim
 main.o: src/main.c src/sim.h
 	cc -g -c src/main.c -I ~/include
 display.o: src/display.c src/sim.h
