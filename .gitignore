@@ -19,6 +19,9 @@
 *.dylib
 *.dll
 
+# Sense include files
+/include/*
+
 # Fortran module files
 *.mod
 *.smod
