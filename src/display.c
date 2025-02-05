@@ -27,7 +27,29 @@ int close_d(){
 }   
 
 int update_d(){
-    return 0;
+
+	clear_display();
+    
+	for(int i=0; i<GRID_WIDTH;i++){
+		for (int j=0; j<GRID_HEIGHT;j++){
+			if((*g)[i][j].count>0){
+				int count = (*g)[i][j].count;
+				int capacity = (*g)[i][j].capacity;
+				float t = count / capacity;
+
+				int R = (int)(255 * (t-1));
+				int G = (int)(255 * (t-1));
+				int B = 255;
+
+				uint32_t hex_color = (R << 16) | (G << 8) | B;
+				
+				bm->pixel[i][j]= hex_color;
+			
+			}
+		}
+	}
+
+	return 0;
 }
 
 void clear_display(void){
