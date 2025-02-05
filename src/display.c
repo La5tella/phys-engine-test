@@ -2,10 +2,17 @@
 
 sense_fb_bitmap_t *bm=NULL;
 pi_framebuffer_t *fb=NULL;
-int init_d(){
+
+int (*g)[GRID_WIDTH][GRID_HEIGHT];	
+
+int init_d(int (*grid)[GRID_WIDTH][GRID_HEIGHT]){
     fb=getFrameBuffer();
     bm=fb->bitmap;
     clear_display();
+    g=grid;
+	
+    
+
     if (fb)
         return 0;
     else
@@ -26,4 +33,4 @@ int update_d(){
 void clear_display(void){
         for(int i=0; i<8;i++){
                 for(int j=0; j<8; j++){
-                        bm->pixel[i][j]=00000;}}}
+                        bm->pixel[i][j]=0x00000;}}}
