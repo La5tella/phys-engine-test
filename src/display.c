@@ -3,9 +3,9 @@
 sense_fb_bitmap_t *bm=NULL;
 pi_framebuffer_t *fb=NULL;
 
-int (*g)[GRID_WIDTH][GRID_HEIGHT];	
+cell_t (*g)[GRID_WIDTH][GRID_HEIGHT];	
 
-int init_d(int (*grid)[GRID_WIDTH][GRID_HEIGHT]){
+int init_d(cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]){
     fb=getFrameBuffer();
     bm=fb->bitmap;
     clear_display();
