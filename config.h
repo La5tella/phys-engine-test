@@ -1,17 +1,22 @@
-//friction value
-#define friction 0.5f
-//momentum transfer factor
-#define p_factor 0.5f
+#ifndef CONFIG_H
+#define CONFIG_H
 
-#define gravity 9.8f
+#define NUM_PARTICLES 15 //number of particles
 
-#define max_velocity 15.0f
+// Physics constants
+#define PHYS_GRAVITY 9.8f //m/s^2
+#define PHYS_FRICTION 0.5f
+#define PHYS_MOMENTUM_FACTOR 0.5f
+#define PHYS_MAX_VELOCITY 15.0f
+#define PHYS_MAX_ACCELERATION 15.0f
+#define PHYS_SMOOTH_VALUE 0.8f //Value of smoothing. should be between 0[no smoothing] and 1[full smoothing])
 
-#define max_acceleration 15.0f
+// Display settings
+#define DISP_REFRESH_RATE 0.1f // seconds
+#define GRID_WIDTH 8
+#define GRID_HEIGHT 8
 
-//display settings
-#define refresh_rate .1 //in seconds
-#define width 8
-#define height 8
-//color of water
-#define COL FFFFF
+// Colors
+#define WATER_COLOR 0xFFFFFF // White
+
+#endif
