@@ -41,7 +41,8 @@ void update_p(){
 		part->vx *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
 		part->vy *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
 		update_particle_position(part);
-	}	
+	}
+		
 }
 
 int add_particles(){
@@ -78,8 +79,8 @@ int remove_particle(){
 
 void smooth_data(){
 	//lerps to velocity for smoother transitions.
-	gyro_data->x = (PHYS_SMOOTH_VALUE * xo) + ((1-PHYS_SMOOTH_VALUE)*gyro_data->x);
-	gyro_data->y = (PHYS_SMOOTH_VALUE * yo) + ((1-PHYS_SMOOTH_VALUE)*gyro_data->y);
+	gyro_data->x = -1*((PHYS_SMOOTH_VALUE * xo) + ((1-PHYS_SMOOTH_VALUE)*gyro_data->x));
+	gyro_data->y = -1*((PHYS_SMOOTH_VALUE * yo) + ((1-PHYS_SMOOTH_VALUE)*gyro_data->y));
 
 
 }
@@ -112,6 +113,7 @@ int check_for_overlap(particle_t* part){
 
 
 void update_particle_position(particle_t* part) {
+	
     // Store the current position as the previous position
    	part->prev_x = (int)part->x;
     	part->prev_y = (int)part->y;
@@ -157,10 +159,12 @@ void update_particle_position(particle_t* part) {
 void remove_particle_from_grid(particle_t* part, int x, int y) {
     //finds previous position in grid, removes from stored pos.
     	cell_t cell = (*_g)[x][y];
-	for(int i=0;i< cell.count;i++){
+	for(int i=0;i<=cell.count;i++){
 		if (cell.particles[i]==part){
 			cell.particles[i]=NULL;
 			cell.count--;
+			printf("removed part at %d,%d\n",x,y);
+			(*_g)[x][y] = cell;
 		}
 		if(cell.count<cell.capacity&&cell.capacity<PHYS_INIT_CELL_CAP)
 			resize_cell(&cell, false);	
@@ -172,10 +176,13 @@ void remove_particle_from_grid(particle_t* part, int x, int y) {
 void add_particle_to_grid(particle_t* part, int x, int y) {
     // Logic to add the particle to the grid at (x, y)
     	cell_t cell = (*_g)[x][y];
+	
 	for(int i=0;i<cell.capacity;i++){
 		if(cell.particles[i]==NULL){
 			cell.particles[i]=part;
 			cell.count++;
+			printf("adding part at %d, %d\n", x, y);
+			(*_g)[x][y] = cell;
 			return;
 		}
 		if(cell.count==cell.capacity){

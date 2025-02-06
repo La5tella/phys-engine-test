@@ -42,7 +42,7 @@ int main(){
         update_p();
         getGyroPosition(gyro, &data);
 	
-	printf("Gyro: %f %f %f\n", data.x, data.y, data.z);
+	//printf("Gyro: %f %f %f\n", data.x, data.y, data.z);
 
         nanosleep(&ts,NULL);
         
