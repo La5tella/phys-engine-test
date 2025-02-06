@@ -42,7 +42,6 @@ int main(){
         update_p();
         getGyroPosition(gyro, &data);
 	
-	//printf("Gyro: %f %f %f\n", data.x, data.y, data.z);
 
         nanosleep(&ts,NULL);
         
@@ -62,9 +61,10 @@ void init_cell(cell_t* cell) {
 	//initializes and allocates memory for each cell in the grid
    	cell->count = 0;
     	cell->capacity = PHYS_INIT_CELL_CAP;
-	cell->particles = malloc(cell->capacity * sizeof(particle_t*));
+	cell->particles = calloc(cell->capacity , sizeof(particle_t*));
     	if (!cell->particles) {
     	    	fprintf(stderr, "Memory allocation failed for cell particles\n");
     	    	exit(EXIT_FAILURE);
     	}
+
 }

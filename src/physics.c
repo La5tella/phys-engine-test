@@ -49,7 +49,7 @@ int add_particles(){
 //adds particles to simulation
 	for(int i=0; i<NUM_PARTICLES;i++){
 		//initializes the particles
-		particles[i] = malloc(sizeof(particle_t));
+		particles[i] = calloc(1, sizeof(particle_t));
 		particle_t* part = particles[i];
 		int overlap = 0;
 		do{
@@ -59,7 +59,10 @@ int add_particles(){
 			overlap = check_for_overlap(part);
 		} while(overlap);
 		//adds the particle to the display grid. Maybe change to adding it out of total particles that can fit?
+		int count = (*_g)[(int)part->x][(int)part->y].count;
+		(*_g)[(int)part->x][(int)part->y].particles[count] = part;
 		(*_g)[(int)part->x][(int)part->y].count++;
+		
 		//sets initial velocity
 		part->vx=0.0f;
 		part->vy=0.0f;
@@ -158,16 +161,21 @@ void update_particle_position(particle_t* part) {
 
 void remove_particle_from_grid(particle_t* part, int x, int y) {
     //finds previous position in grid, removes from stored pos.
-    	cell_t cell = (*_g)[x][y];
-	for(int i=0;i<=cell.count;i++){
-		if (cell.particles[i]==part){
-			cell.particles[i]=NULL;
-			cell.count--;
-			printf("removed part at %d,%d\n",x,y);
-			(*_g)[x][y] = cell;
-		}
-		if(cell.count<cell.capacity&&cell.capacity<PHYS_INIT_CELL_CAP)
-			resize_cell(&cell, false);	
+    	cell_t* cell = &((*_g)[x][y]);
+	for(int i=0;i<cell->count;i++){
+		if (cell->particles[i] == part) {
+            	// Found the particle; shift subsequent elements left
+            		for (int j = i; j < cell->count - 1; j++) {
+               			cell->particles[j] = cell->particles[j+1];
+           			}
+            	// Clear the now-unused last element and update count
+            			cell->particles[cell->count - 1] = NULL;
+            			cell->count--;
+            			printf("removed part at %d, %d\n", x, y);
+            			break;  // Exit the loop once the particle is removed
+       			 }
+		if(cell->count<cell->capacity&&cell->capacity<PHYS_INIT_CELL_CAP)
+			resize_cell(cell, false);	
 	}
 	//add a checker if the grid can downsize
 
