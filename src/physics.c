@@ -12,6 +12,7 @@ void smooth_data();
 int check_for_overlap(particle_t* part);
 void remove_particle_from_grid(particle_t* part, int x, int y);
 void add_particle_to_grid(particle_t* part, int x, int y);
+void resize_cell(cell_t* cell, bool uord);
 
 int init_p(coordinate_t* data, cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]){
     	_g=grid;
@@ -30,6 +31,17 @@ int close_p(){
 
 void update_p(){
 	smooth_data();
+	for(int i=0; i<NUM_PARTICLES;i++){
+		particle_t* part=particles[i];
+		// Update velocity with directional acceleration from gyro data
+		part->vx += gyro_data->x * PHYS_ACCEL_FAC;
+		part->vy += gyro_data->y * PHYS_ACCEL_FAC;
+
+		// Apply friction to gradually slow down the velocity
+		part->vx *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
+		part->vy *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
+		update_particle_position(part);
+	}	
 }
 
 int add_particles(){
@@ -60,6 +72,9 @@ int remove_particle(){
 		free(particles[i]);
     return 0;
 }   
+
+
+
 
 void smooth_data(){
 	//lerps to velocity for smoother transitions.
@@ -95,18 +110,40 @@ int check_for_overlap(particle_t* part){
 	return 0;
 }
 
+
 void update_particle_position(particle_t* part) {
     // Store the current position as the previous position
    	part->prev_x = (int)part->x;
     	part->prev_y = (int)part->y;
 
     // Update the particle's current position based on velocity
-    	part->x += part->vx;
-   	part->y += part->vy;
+    	if(part->x + part->vx > 0 && part->x + part->vx < GRID_WIDTH)
+		part->x += part->vx;
+	else if(part->x + part->vx >= GRID_WIDTH){
+	      //set pos and reflect velocity	
+		part->x = GRID_WIDTH-1;
+		part->vx *= -1;
+	}
+	else if(part->x + part->vx <= 0)
+		part->x =0;
+		part->vx *=-1;
+
+	if(part->y + part->vy > 0 && part->y + part->vy < GRID_HEIGHT)
+		part->y += part->vy;
+	else if(part->y + part->vy >= GRID_HEIGHT){
+	      //set pos and reflect velocity	
+		part->y = GRID_HEIGHT-1;
+		part->vy *= -1;
+	}
+	else if(part->y + part->vy <= 0)
+		part->y =0;
+		part->vy *=-1;
 
     // Calculate the new grid cell (assuming some grid size, e.g., 10x10)
     	int new_x = (int)part->x;
     	int new_y = (int)part->y;
+
+	
 
     // Check if the particle has moved to a new cell
     	if (part->prev_x != new_x || part->prev_y != new_y) {
@@ -119,9 +156,58 @@ void update_particle_position(particle_t* part) {
 
 void remove_particle_from_grid(particle_t* part, int x, int y) {
     //finds previous position in grid, removes from stored pos.
+    	cell_t cell = (*_g)[x][y];
+	for(int i=0;i< cell.count;i++){
+		if (cell.particles[i]==part){
+			cell.particles[i]=NULL;
+			cell.count--;
+		}
+		if(cell.count<cell.capacity&&cell.capacity<PHYS_INIT_CELL_CAP)
+			resize_cell(&cell, false);	
+	}
+	//add a checker if the grid can downsize
 
 }
 
 void add_particle_to_grid(particle_t* part, int x, int y) {
     // Logic to add the particle to the grid at (x, y)
+    	cell_t cell = (*_g)[x][y];
+	for(int i=0;i<cell.capacity;i++){
+		if(cell.particles[i]==NULL){
+			cell.particles[i]=part;
+			cell.count++;
+			return;
+		}
+		if(cell.count==cell.capacity){
+			resize_cell(&cell, true);
+		}
+			
+	}
 }
+
+void resize_cell(cell_t* cell, bool uord){
+	//adds one extra slot to the cell
+	if(uord){
+		cell->capacity+=1;
+		cell->particles = realloc(cell->particles, cell->capacity * sizeof(cell_t));
+		if (cell->particles == NULL) {
+    			if (cell->particles == NULL) {
+    					fprintf(stderr, "Memory allocation failed for grid cell\n");
+    				exit(EXIT_FAILURE);  // Optionally terminate the program if memory allocation is critical
+			}
+		}
+	}else{
+		cell->capacity-=1;
+		cell->particles = realloc(cell->particles, cell->capacity * sizeof(cell_t));
+		if (cell->particles == NULL) {
+    			if (cell->particles == NULL) {
+    					fprintf(stderr, "Memory allocation failed for grid cell\n");
+    				exit(EXIT_FAILURE);  // Optionally terminate the program if memory allocation is critical
+			}
+		}
+
+	}
+
+}
+
+

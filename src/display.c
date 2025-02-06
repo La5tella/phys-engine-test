@@ -29,7 +29,8 @@ int close_d(){
 int update_d(){
 
 	clear_display();
-    
+   	//loops through grid, checks if there is any particles in there, adjust colors accordingly based on capacity.
+	 
 	for(int i=0; i<GRID_WIDTH;i++){
 		for (int j=0; j<GRID_HEIGHT;j++){
 			if((*g)[i][j].count>0){
@@ -37,8 +38,8 @@ int update_d(){
 				int capacity = (*g)[i][j].capacity;
 				float t = count / capacity;
 
-				int R = (int)(255 * (t-1));
-				int G = (int)(255 * (t-1));
+				int R = (int)(255 * (1-t));
+				int G = (int)(255 * (1-t));
 				int B = 255;
 
 				uint32_t hex_color = (R << 16) | (G << 8) | B;

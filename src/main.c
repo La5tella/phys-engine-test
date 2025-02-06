@@ -31,7 +31,7 @@ int main(){
     }
 	printf("%d\n",grid[0][1]);
     struct timespec ts ={0, (DISP_REFRESH_RATE * 1000000000)};
-    double dt = DISP_REFRESH_RATE; 
+    
     printf("init success. running...\n");
 
     while (running){

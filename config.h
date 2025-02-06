@@ -5,8 +5,9 @@
 
 // Physics constants
 #define PHYS_GRAVITY 9.8f //m/s^2
-#define PHYS_FRICTION 0.5f
+#define PHYS_FRICTION 0.8f
 #define PHYS_MOMENTUM_FACTOR 0.5f
+#define PHYS_ACCEL_FAC 0.8f //how much gyro affects acceleration
 #define PHYS_MAX_VELOCITY 15.0f
 #define PHYS_MAX_ACCELERATION 15.0f
 #define PHYS_SMOOTH_VALUE 0.8f //Value of smoothing. should be between 0[no smoothing] and 1[full smoothing])

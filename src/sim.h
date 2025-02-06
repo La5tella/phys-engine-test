@@ -4,6 +4,7 @@
 #include <time.h>
 #include "../config.h"
 #include "sense.h"
+#include <stdbool.h>
 
 //types
 typedef struct {
