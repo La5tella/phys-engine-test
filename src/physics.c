@@ -16,6 +16,7 @@ void resize_cell(cell_t* cell, bool uord);
 void update_velocity(particle_t* part);
 void debug_vel(particle_t* part);
 void reflect_particle_velocity(particle_t* part1, particle_t* part2);
+int check_for_room(particle_t* part, int x, int y);
 
 int init_p(coordinate_t* data, cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]){
     	_g=grid;
@@ -212,10 +213,30 @@ void update_particle_position(particle_t* part) {
     // Check if the particle has moved to a new cell
     	if (part->prev_x != new_x || part->prev_y != new_y) {
         // Update the grid cell to the new one
-        	remove_particle_from_grid(part, part->prev_x, part->prev_y);
-        	add_particle_to_grid(part, new_x, new_y);
+		if(check_for_room(part, new_x, new_y)){
+        		remove_particle_from_grid(part, part->prev_x, part->prev_y);
+        		add_particle_to_grid(part, new_x, new_y);
+		} else {
+			part->x=part->prev_x;
+			part->y=part->prev_y;
+		}
 
     }
+}
+
+int check_for_room(particle_t* part, int x, int y){
+	//checker for if particle cell attempts to move into is at capacity.
+	cell_t* cell = &((*_g)[x][y]);
+	
+	if(cell->count<cell->capacity){
+		return 1;
+	}
+	else if(cell->capacity<PHYS_CELL_CAP){
+		return 1;
+	}
+	return 0;	
+	
+
 }
 
 void remove_particle_from_grid(particle_t* part, int x, int y) {
@@ -250,19 +271,20 @@ void add_particle_to_grid(particle_t* part, int x, int y) {
 			cell->count++;
 			return;
 		}
-		if(cell->count==cell->capacity){
+		if(cell->count==cell->capacity&&cell->capacity<=PHYS_CELL_CAP){
 			resize_cell(cell, true);
-		}
-			
+		}			
 	}
 }
 
-void resize_cell(cell_t* cell, bool uord){
+void resize_cell(cell_t* cell, bool UorD){
 	//adds one extra slot to the cell
-	//I THINK THIS QUEUES UP A DOUBLE FREE
+	//Should cap it off
+	//UorD = Scale Up or Scale Down
 	
-	if(uord){
-		particle_t** temp = realloc(cell->particles, (cell->capacity+PHYS_INIT_CELL_CAP) * sizeof(cell_t));
+	if(UorD){
+		
+		particle_t** temp = realloc(cell->particles, (cell->capacity+1) * sizeof(cell_t));
 		if(temp == NULL)
 			return;
 		cell->capacity+=1;

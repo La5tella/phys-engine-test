@@ -38,8 +38,6 @@ int init_d(cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]);
 int close_d();
 void clear_display();
 
-//tilt funcs
-int init_t(pi_i2c_t* gyro, coordinate_t* data);
-int close_t();
-
-
+//input funcs
+int init_i(pi_joystick_t** js, pi_i2c_t* gyro, coordinate_t* data);
+int close_i(pi_joystick_t** js, pi_i2c_t* gyro);

@@ -36,7 +36,8 @@ int update_d(){
 			if((*g)[i][j].count>0){
 				int count = (*g)[i][j].count;
 				int capacity = (*g)[i][j].capacity;
-				float t = count / capacity;
+				float t = (float)count / (float)capacity;
+				t = fminf(fmaxf(t, 0.0f), 1.0f);
 
 				int R = (int)(255 * (1-t));
 				int G = (int)(255 * (1-t));
