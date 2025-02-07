@@ -5,6 +5,7 @@
 #include "../config.h"
 #include "sense.h"
 #include <stdbool.h>
+#include <pthread.h>
 
 //types
 typedef struct {

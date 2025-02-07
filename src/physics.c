@@ -24,6 +24,7 @@ int init_p(coordinate_t* data, cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]){
 		return 0;
 	else
 		return 1;
+
 }
 
 int close_p(){
@@ -37,7 +38,8 @@ void update_p(){
 		particle_t* part=particles[i];
 		update_velocity(part);
 		update_particle_position(part);
-		//debug_vel(part);
+		if(PART_DEBUG)
+			debug_vel(part);
 	}
 		
 }
@@ -73,7 +75,7 @@ int add_particles(){
 		particles[i] = calloc(1, sizeof(particle_t));
 		particle_t* part = particles[i];
 		
-		//adds the particle to the display grid. Maybe change to adding it out of total particles that can fit?
+	
 		part->x = (rand() % GRID_WIDTH);
 		part->y = (rand() % GRID_HEIGHT);
 
@@ -213,7 +215,7 @@ void remove_particle_from_grid(particle_t* part, int x, int y) {
             			
             			break;  // Exit the loop once the particle is removed
        			 }
-		if(cell->count<cell->capacity&&cell->capacity<PHYS_INIT_CELL_CAP)
+		if(cell->count<cell->capacity&&cell->capacity>PHYS_INIT_CELL_CAP)
 			resize_cell(cell, false);	
 	}
 	//add a checker if the grid can downsize
@@ -222,18 +224,16 @@ void remove_particle_from_grid(particle_t* part, int x, int y) {
 
 void add_particle_to_grid(particle_t* part, int x, int y) {
     // Logic to add the particle to the grid at (x, y)
-    	cell_t cell = (*_g)[x][y];
-	
-	for(int i=0;i<cell.capacity;i++){
-		if(cell.particles[i]==NULL){
-			cell.particles[i]=part;
-			cell.count++;
-			
-			(*_g)[x][y] = cell;
+	cell_t* cell = &((*_g)[x][y]);
+
+	for(int i=0;i<cell->capacity;i++){
+		if(cell->particles[i]==NULL){
+			cell->particles[i]=part;
+			cell->count++;
 			return;
 		}
-		if(cell.count==cell.capacity){
-			resize_cell(&cell, true);
+		if(cell->count==cell->capacity){
+			resize_cell(cell, true);
 		}
 			
 	}
@@ -242,8 +242,9 @@ void add_particle_to_grid(particle_t* part, int x, int y) {
 void resize_cell(cell_t* cell, bool uord){
 	//adds one extra slot to the cell
 	//I THINK THIS QUEUES UP A DOUBLE FREE
+	
 	if(uord){
-		particle_t** temp = realloc(cell->particles, (cell->capacity+1) * sizeof(cell_t));
+		particle_t** temp = realloc(cell->particles, (cell->capacity+PHYS_INIT_CELL_CAP) * sizeof(cell_t));
 		if(temp == NULL)
 			return;
 		cell->capacity+=1;
@@ -264,6 +265,7 @@ void resize_cell(cell_t* cell, bool uord){
 					}
 
 	}
+	
 
 }
 

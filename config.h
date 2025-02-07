@@ -1,7 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define NUM_PARTICLES 6 //number of particles
+#define NUM_PARTICLES 1 //number of particles
+#define PART_DEBUG 1 //set to 1 if there is only one particle and you to print it's velocity
 
 // Physics constants
 #define PHYS_OVERLAP_THRESHOLD 0.25f //how far apart each particle must be to collide.
