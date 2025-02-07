@@ -9,12 +9,13 @@ particle_t* particles[NUM_PARTICLES];
 
 //func prototyping
 void smooth_data();
-particle_t** check_for_overlap(particle_t* part);
+void check_for_overlap(particle_t* part);
 void remove_particle_from_grid(particle_t* part, int x, int y);
 void add_particle_to_grid(particle_t* part, int x, int y);
 void resize_cell(cell_t* cell, bool uord); 
 void update_velocity(particle_t* part);
 void debug_vel(particle_t* part);
+void reflect_particle_velocity(particle_t* part1, particle_t* part2);
 
 int init_p(coordinate_t* data, cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]){
     	_g=grid;
@@ -36,6 +37,7 @@ void update_p(){
 	smooth_data();
 	for(int i=0; i<NUM_PARTICLES;i++){
 		particle_t* part=particles[i];
+		check_for_overlap(part);
 		update_velocity(part);
 		update_particle_position(part);
 		if(PART_DEBUG)
@@ -108,7 +110,7 @@ void smooth_data(){
 
 }
 
-particle_t** check_for_overlap(particle_t* part){
+void check_for_overlap(particle_t* part){
 	//FREE MUST BE CALLED AFTER THIS FUNCTION!!
 	//Checks if particle is in grid. Should check if any particles in nearby grid cells are overlapping.
 	int x = (int)part->x;
@@ -134,19 +136,34 @@ particle_t** check_for_overlap(particle_t* part){
 				continue;
 		}
 	}
-	if(count==0)
-		return NULL;
+	if(part_count==0)
+		return;
 	//returns an array with pointers to the cells with overlapped particles
 	//probably should return an array of particles that are in the overlap threshold.
-	particle_t** overlap_part= calloc(part_count, sizeof(particle_t*));
+	particle_t** potential_part= calloc(part_count, sizeof(particle_t*));
 	int tally=0;
-	for(int i=0;cells[i]!=NULL;i++){
-		for(int j=0;j<(cells[i])->count;j++){
-			overlap_part[tally]=(cells[i])->particles[j];
-			tally++;
+	for(int i=0;i<count;i++){
+		if(cells[i]!=NULL){
+			for(int j=0;j<(cells[i])->count;j++){
+				potential_part[tally]=(cells[i])->particles[j];
+				tally++;
+				}
+			}
 		}
+	//iterates through potential particles and acts based on distance threshold
+	for(int i=0;i<part_count;i++){
+		particle_t* part2 = potential_part[i];
+		//compares the squared distance to circumvent sqrt funcs
+		float dx = part->x - part2->x;
+		float dy = part->y - part2->y;
+		float distance_squared = dx * dx + dy * dy;
+		float threshold_squared = PHYS_OVERLAP_THRESHOLD * PHYS_OVERLAP_THRESHOLD;
+		if (distance_squared < threshold_squared) {
+    			reflect_particle_velocity(part,part2);
 		}
-	return overlap_part;
+	}
+	free(potential_part);
+	return;
 }
 
 
@@ -156,6 +173,7 @@ void update_particle_position(particle_t* part) {
    	part->prev_x = (int)part->x;
     	part->prev_y = (int)part->y;
 	
+	
     // Update the particle's current position based on velocity
     	if(part->x + part->vx > 0 && part->x + part->vx < GRID_WIDTH)
 		part->x += part->vx;
@@ -163,12 +181,12 @@ void update_particle_position(particle_t* part) {
 	else if(part->x + part->vx >= GRID_WIDTH){
 	      //set pos and reflect velocity	
 		part->x = GRID_WIDTH-1;
-		part->vx *= (-1* PHYS_MOMENTUM_FACTOR);
+		part->vx *= (-1* PHYS_MOMENTUM_FAC);
 		
 	}
 	else if(part->x + part->vx <= 0){
 		part->x =0;
-		part->vx *=(-1* PHYS_MOMENTUM_FACTOR);
+		part->vx *=(-1* PHYS_MOMENTUM_FAC);
 
 	}
 	
@@ -179,11 +197,11 @@ void update_particle_position(particle_t* part) {
 	else if(part->y + part->vy >= GRID_HEIGHT){
 	      //set pos and reflect velocity	
 		part->y = GRID_HEIGHT-1;
-		part->vy *= (-1* PHYS_MOMENTUM_FACTOR);
+		part->vy *= (-1* PHYS_MOMENTUM_FAC);
 	}
 	else if(part->y + part->vy <= 0){
 		part->y =0;
-		part->vy *=(-1* PHYS_MOMENTUM_FACTOR);
+		part->vy *= (-1* PHYS_MOMENTUM_FAC);
 	}
     
     	int new_x = (int)part->x;
@@ -267,6 +285,48 @@ void resize_cell(cell_t* cell, bool uord){
 	}
 	
 
+}
+
+void reflect_particle_velocity(particle_t* part1, particle_t* part2) {
+    // Calculate normal vector
+    float dx = part2->x - part1->x;
+    float dy = part2->y - part1->y;
+
+    // Calculate distance and apply fast inverse square root for normalization
+    float distance_squared = dx * dx + dy * dy;
+    float distance = Q_rsqrt(distance_squared);  
+
+    // Normalize the normal vector
+    float nx = dx * distance;
+    float ny = dy * distance;
+
+    // Calculate the velocity difference
+    float vx_diff = part2->vx - part1->vx;
+    float vy_diff = part2->vy - part1->vy;
+
+    // Calculate the dot product (velocity difference with the normal)
+    float dot_product = vx_diff * nx + vy_diff * ny;
+
+    // Update velocities of the particles
+    part1->vx += PHYS_MOMENTUM_FAC * (2 * dot_product * nx);
+    part1->vy += PHYS_MOMENTUM_FAC * (2 * dot_product * ny);
+
+    part2->vx -= PHYS_MOMENTUM_FAC * (2 * dot_product * nx);
+    part2->vy -= PHYS_MOMENTUM_FAC * (2 * dot_product * ny);
+
+    // Optionally, you could add a check to prevent particles from overlapping or moving too fast.
+    }
+
+float Q_rsqrt(float number)
+	//ripped from quake 3. Thanks id!! 
+{
+  union {
+    float    f;
+    uint32_t i;
+  } conv = { .f = number };
+  conv.i  = 0x5f3759df - (conv.i >> 1);
+  conv.f *= 1.5F - (number * 0.5F * conv.f * conv.f);
+  return conv.f;
 }
 
 

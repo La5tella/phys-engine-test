@@ -5,7 +5,7 @@
 #include "../config.h"
 #include "sense.h"
 #include <stdbool.h>
-#include <pthread.h>
+#include <stdint.h>
 
 //types
 typedef struct {
@@ -29,6 +29,7 @@ int add_particles();
 int remove_particle();
 int close_p();
 void update_p();
+float Q_rsqrt(float number);
 
 
 //display funcs

@@ -21,10 +21,13 @@ run:
 	./sim
 
 gitpush:
-	git add src/main.c src/display.c src/tilt.c src/physics.c
+	git add src/main.c src/display.c src/tilt.c src/physics.c config.h src/sim.h
 	git commit
 	git push
 
 debug: 
 	make all
 	gdb -q -tui ./sim
+refresh:
+	make clean
+	make run
