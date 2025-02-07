@@ -1,12 +1,12 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#define NUM_PARTICLES 1 //number of particles
+#define NUM_PARTICLES 6 //number of particles
 
 // Physics constants
 #define PHYS_OVERLAP_THRESHOLD 0.25f //how far apart each particle must be to collide.
 #define PHYS_FRICTION 0.8f
-#define PHYS_MOMENTUM_FACTOR 0.8f
+#define PHYS_MOMENTUM_FACTOR 0.6f
 #define PHYS_ACCEL_FAC 0.8f //how much gyro affects acceleration
 #define PHYS_MAX_VELOCITY 15.0f
 #define PHYS_MAX_ACCEL 15.0f

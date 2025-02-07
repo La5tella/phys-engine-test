@@ -37,7 +37,7 @@ void update_p(){
 		particle_t* part=particles[i];
 		update_velocity(part);
 		update_particle_position(part);
-		debug_vel(part);
+		//debug_vel(part);
 	}
 		
 }
@@ -241,24 +241,27 @@ void add_particle_to_grid(particle_t* part, int x, int y) {
 
 void resize_cell(cell_t* cell, bool uord){
 	//adds one extra slot to the cell
+	//I THINK THIS QUEUES UP A DOUBLE FREE
 	if(uord){
+		particle_t** temp = realloc(cell->particles, (cell->capacity+1) * sizeof(cell_t));
+		if(temp == NULL)
+			return;
 		cell->capacity+=1;
-		cell->particles = realloc(cell->particles, cell->capacity * sizeof(cell_t));
-		if (cell->particles == NULL) {
-    			if (cell->particles == NULL) {
-    					fprintf(stderr, "Memory allocation failed for grid cell\n");
+		cell->particles = temp;
+		if (cell->particles == NULL) {	
+    				fprintf(stderr, "Memory allocation failed for grid cell\n");
     				exit(EXIT_FAILURE);  // Optionally terminate the program if memory allocation is critical
-			}
-		}
+					}
 	}else{
+		particle_t** temp = realloc(cell->particles, (cell->capacity-1) * sizeof(cell_t));
+		if(temp == NULL)
+			return;
 		cell->capacity-=1;
-		cell->particles = realloc(cell->particles, cell->capacity * sizeof(cell_t));
+		cell->particles = temp;
 		if (cell->particles == NULL) {
-    			if (cell->particles == NULL) {
-    					fprintf(stderr, "Memory allocation failed for grid cell\n");
+    			    	fprintf(stderr, "Memory allocation failed for grid cell\n");
     				exit(EXIT_FAILURE);  // Optionally terminate the program if memory allocation is critical
-			}
-		}
+					}
 
 	}
 
