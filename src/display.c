@@ -56,4 +56,4 @@ int update_d(){
 void clear_display(void){
         for(int i=0; i<8;i++){
                 for(int j=0; j<8; j++){
-                        bm->pixel[i][j]=0x00000;}}}
+                        bm->pixel[i][j]=0x000000;}}}

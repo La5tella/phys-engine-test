@@ -9,10 +9,12 @@ particle_t* particles[NUM_PARTICLES];
 
 //func prototyping
 void smooth_data();
-int check_for_overlap(particle_t* part);
+particle_t** check_for_overlap(particle_t* part);
 void remove_particle_from_grid(particle_t* part, int x, int y);
 void add_particle_to_grid(particle_t* part, int x, int y);
-void resize_cell(cell_t* cell, bool uord);
+void resize_cell(cell_t* cell, bool uord); 
+void update_velocity(particle_t* part);
+void debug_vel(particle_t* part);
 
 int init_p(coordinate_t* data, cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]){
     	_g=grid;
@@ -33,16 +35,35 @@ void update_p(){
 	smooth_data();
 	for(int i=0; i<NUM_PARTICLES;i++){
 		particle_t* part=particles[i];
-		// Update velocity with directional acceleration from gyro data
-		part->vx += gyro_data->x * PHYS_ACCEL_FAC;
-		part->vy += gyro_data->y * PHYS_ACCEL_FAC;
-
-		// Apply friction to gradually slow down the velocity
-		part->vx *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
-		part->vy *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
+		update_velocity(part);
 		update_particle_position(part);
+		debug_vel(part);
 	}
 		
+}
+
+void debug_vel(particle_t* part){
+		//recommended for use with a single particle to adjust parameters.
+	printf("\rVx: %+04.2f Ax: %+04.2f Vy: %+04.2f Ay: %+04.2f", part->vx, (PHYS_MAX_ACCEL * ((gyro_data->x)/180)) * PHYS_ACCEL_FAC, part->vy, (PHYS_MAX_ACCEL * ((gyro_data->y)/180)) * PHYS_ACCEL_FAC);
+	fflush(stdout);
+}
+
+void update_velocity(particle_t* part){
+	// Update velocity with directional acceleration from gyro data
+	part->vx += (PHYS_MAX_ACCEL * ((gyro_data->x)/180)) * PHYS_ACCEL_FAC;
+	part->vy += (PHYS_MAX_ACCEL * ((gyro_data->y)/180)) * PHYS_ACCEL_FAC;
+
+	// Apply friction to gradually slow down the velocity
+	part->vx *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
+	part->vy *= (1 - PHYS_FRICTION * DISP_REFRESH_RATE);
+
+	if(part->vx>PHYS_MAX_VELOCITY)
+		part->vx=PHYS_MAX_VELOCITY;
+
+	if(part->vy>PHYS_MAX_VELOCITY)
+		part->vy=PHYS_MAX_VELOCITY;
+
+
 }
 
 int add_particles(){
@@ -51,14 +72,11 @@ int add_particles(){
 		//initializes the particles
 		particles[i] = calloc(1, sizeof(particle_t));
 		particle_t* part = particles[i];
-		int overlap = 0;
-		do{
-			//places randomly on grid
-			part->x = (rand() % GRID_WIDTH);
-			part->y = (rand() % GRID_HEIGHT);
-			overlap = check_for_overlap(part);
-		} while(overlap);
+		
 		//adds the particle to the display grid. Maybe change to adding it out of total particles that can fit?
+		part->x = (rand() % GRID_WIDTH);
+		part->y = (rand() % GRID_HEIGHT);
+
 		int count = (*_g)[(int)part->x][(int)part->y].count;
 		(*_g)[(int)part->x][(int)part->y].particles[count] = part;
 		(*_g)[(int)part->x][(int)part->y].count++;
@@ -88,11 +106,15 @@ void smooth_data(){
 
 }
 
-int check_for_overlap(particle_t* part){
+particle_t** check_for_overlap(particle_t* part){
+	//FREE MUST BE CALLED AFTER THIS FUNCTION!!
 	//Checks if particle is in grid. Should check if any particles in nearby grid cells are overlapping.
 	int x = (int)part->x;
 	int y = (int)part->y;
-
+	int count = 0;
+	int part_count=0;
+	cell_t* cells[9] = {NULL};
+		
 	//loop through neighboring cells. Identify if the cell is occupied
 	for(int dx = -1; dx <=1; dx++){
 		for(int dy = -1; dy<=1; dy++){
@@ -104,14 +126,25 @@ int check_for_overlap(particle_t* part){
 				continue;
 
 			if((*_g)[neighbor_x][neighbor_y].count>0)
-				return 1;
-			
+				cells[count]=&((*_g)[neighbor_x][neighbor_y]);
+				part_count += (*_g)[neighbor_x][neighbor_y].count;
+				count++;
+				continue;
 		}
-
-
-
 	}
-	return 0;
+	if(count==0)
+		return NULL;
+	//returns an array with pointers to the cells with overlapped particles
+	//probably should return an array of particles that are in the overlap threshold.
+	particle_t** overlap_part= calloc(part_count, sizeof(particle_t*));
+	int tally=0;
+	for(int i=0;cells[i]!=NULL;i++){
+		for(int j=0;j<(cells[i])->count;j++){
+			overlap_part[tally]=(cells[i])->particles[j];
+			tally++;
+		}
+		}
+	return overlap_part;
 }
 
 
@@ -120,31 +153,37 @@ void update_particle_position(particle_t* part) {
     // Store the current position as the previous position
    	part->prev_x = (int)part->x;
     	part->prev_y = (int)part->y;
-
+	
     // Update the particle's current position based on velocity
     	if(part->x + part->vx > 0 && part->x + part->vx < GRID_WIDTH)
 		part->x += part->vx;
+		
 	else if(part->x + part->vx >= GRID_WIDTH){
 	      //set pos and reflect velocity	
 		part->x = GRID_WIDTH-1;
-		part->vx *= -1;
+		part->vx *= (-1* PHYS_MOMENTUM_FACTOR);
+		
 	}
-	else if(part->x + part->vx <= 0)
+	else if(part->x + part->vx <= 0){
 		part->x =0;
-		part->vx *=-1;
+		part->vx *=(-1* PHYS_MOMENTUM_FACTOR);
 
+	}
+	
 	if(part->y + part->vy > 0 && part->y + part->vy < GRID_HEIGHT)
 		part->y += part->vy;
+		
+		
 	else if(part->y + part->vy >= GRID_HEIGHT){
 	      //set pos and reflect velocity	
 		part->y = GRID_HEIGHT-1;
-		part->vy *= -1;
+		part->vy *= (-1* PHYS_MOMENTUM_FACTOR);
 	}
-	else if(part->y + part->vy <= 0)
+	else if(part->y + part->vy <= 0){
 		part->y =0;
-		part->vy *=-1;
-
-    // Calculate the new grid cell (assuming some grid size, e.g., 10x10)
+		part->vy *=(-1* PHYS_MOMENTUM_FACTOR);
+	}
+    
     	int new_x = (int)part->x;
     	int new_y = (int)part->y;
 
@@ -171,7 +210,7 @@ void remove_particle_from_grid(particle_t* part, int x, int y) {
             	// Clear the now-unused last element and update count
             			cell->particles[cell->count - 1] = NULL;
             			cell->count--;
-            			printf("removed part at %d, %d\n", x, y);
+            			
             			break;  // Exit the loop once the particle is removed
        			 }
 		if(cell->count<cell->capacity&&cell->capacity<PHYS_INIT_CELL_CAP)
@@ -189,7 +228,7 @@ void add_particle_to_grid(particle_t* part, int x, int y) {
 		if(cell.particles[i]==NULL){
 			cell.particles[i]=part;
 			cell.count++;
-			printf("adding part at %d, %d\n", x, y);
+			
 			(*_g)[x][y] = cell;
 			return;
 		}
