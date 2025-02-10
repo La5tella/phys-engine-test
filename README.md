@@ -18,23 +18,37 @@ Any code that is in ../include was not created by me, but by Andrew Roosen at th
  
 ### Config
 
-**NUM_PARTICLES** Number of particles in the simulation
-**PART_DEBUG** Triggers physics.c:debug_vel. Prints velocity of debug particle. Only works with one particle
-**DISP_REFRESH_RATE** Refresh rate in seconds.
-**GRID_WIDTH** Maximum for SENSE hat is 8.
-**GRID_HEIGHT** Maximum for SENSE hat is 8.
+**NUM_PARTICLES** Number of particles in the simulation.\
 
-**PHYS_OVERLAP_THRESHOLD** How far apart each particle must be to collide.
-**PHYS_FRICTION** Friction factor. How hard it is for each particle to move.
-**PHYS_MOMENTUM_FAC** Percentage of velocity retained per collision. Set to 1 for perfectly elastic collisions.
-**PHYS_ACCEL_FAC** How much gyro affects acceleration
-**PHYS_MAX_VELOCITY** Maximum speed of a particle
-**PHYS_MAX_ACCEL** Maximum acceleration of a particle.
-**PHYS_SMOOTH_VALUE** Value of smoothing for the gyro input data.
-**PHYS_INIT_CELL_CAP** How many particles can be in a cell before reallocation of memory size
-**PHYS_CELL_CAP** The most amount of particles allowed per cell. Cannot be lower than INIT_CAP
+**PART_DEBUG** Triggers physics.c:debug_vel. Prints velocity of debug particle. Only works with one particle\
 
-**WATER_COLOR** Decides color of cells with lower particle count
+**DISP_REFRESH_RATE** Refresh rate in seconds.\
+
+**GRID_WIDTH** Maximum for SENSE hat is 8.\
+
+**GRID_HEIGHT** Maximum for SENSE hat is 8.\
+
+
+**PHYS_OVERLAP_THRESHOLD** How far apart each particle must be to collide.\
+
+**PHYS_FRICTION** Friction factor. How hard it is for each particle to move.\
+
+**PHYS_MOMENTUM_FAC** Percentage of velocity retained per collision. Set to 1 for perfectly elastic collisions.\
+
+**PHYS_ACCEL_FAC** How much gyro affects acceleration\
+
+**PHYS_MAX_VELOCITY** Maximum speed of a particle\
+
+**PHYS_MAX_ACCEL** Maximum acceleration of a particle.\
+
+**PHYS_SMOOTH_VALUE** Value of smoothing for the gyro input data.\
+
+**PHYS_INIT_CELL_CAP** How many particles can be in a cell before reallocation of memory size\
+
+**PHYS_CELL_CAP** The most amount of particles allowed per cell. Cannot be lower than INIT_CAP\
+
+
+**WATER_COLOR** Decides color of cells with lower particle count\
 
 
 ### Structures
@@ -49,11 +63,11 @@ typedef struct {
 	float vx,vy; //velocity
 } particle_t;
 ```
-*x* and *y* are floats that represent the particles in two dimensional space. 
+- *x* and *y* are floats that represent the particles in two dimensional space. 
 
-*prev_x* and *prev_y* are ints that represent the previous grid of the particle. It is used to check if that particle moves within it's current grid
+- *prev_x* and *prev_y* are ints that represent the previous grid of the particle. It is used to check if that particle moves within it's current grid
 
-*vx* and *vy* are velocities.
+- *vx* and *vy* are velocities.
 
 **Cell:** 
 ```
@@ -63,11 +77,11 @@ typedef struct {
 	int capacity;
 } cell_t;
 ```
-*particles* is a collection of particles currently in the cell.
+- *particles* is a collection of particles currently in the cell.
 
-*count* is the amount of particles in the cell.
+- *count* is the amount of particles in the cell.
 
-*capacity* is the amount of particles that can fit in the cell. It can be resized dynamically, but is used to save memory. It can be capped in config.h
+- *capacity* is the amount of particles that can fit in the cell. It can be resized dynamically, but is used to save memory. It can be capped in config.h
 
 ### Physics functions:
 
@@ -97,7 +111,7 @@ Updates the velocity of a given particle.
 
 **void debug_vel(particle_t\* part);**
 
-Prints the velocity and acceleration of one particle. Should only be used if one particle is in the system.
+Prints the velocity and acceleration of one particle. [!NOTE] Should only be used if one particle is in the system.
 
 **void reflect_particle_velocity(particle_t\* part1, particle_t\* part2);**
 
@@ -153,10 +167,10 @@ Frees up any initialized data.
 
 Sets every LED in the display to black.
 
-**int init_i(pi_joystick_t\*\* js, pi_i2c_t* gyro, coordinate_t* data);**
+**int init_i(pi_joystick_t\*\* js, pi_i2c_t\* gyro, coordinate_t\* data);**
 
 Opens up inputs on the SENSE hat.
 
-**int close_i(pi_joystick_t\*\* js, pi_i2c_t* gyro);**
+**int close_i(pi_joystick_t\*\* js, pi_i2c_t\* gyro);**
 
 Closes inputs on the SENSE hat
