@@ -71,90 +71,90 @@ typedef struct {
 
 **void smooth_data();** 
 
-    Used to smooth out the raw input from the gyro to reduce jittering.
+Used to smooth out the raw input from the gyro to reduce jittering.
 
-**void check_for_overlap(particle_t* part);** 
+**void check_for_overlap(particle_t\* part);** 
 
-    Used to check if a particle is overlapping any other particle. Checks within a 3x3 grid of surrounding cells to find nearby particles to interact with.
+Used to check if a particle is overlapping any other particle. Checks within a 3x3 grid of surrounding cells to find nearby particles to interact with.
 
-**void remove_particle_from_grid(particle_t* part, int x, int y);**
+**void remove_particle_from_grid(particle_t\* part, int x, int y);**
 
-    Removes particle from a cell, downsizes if there is space.
+Removes particle from a cell, downsizes if there is space.
 
-**void add_particle_to_grid(particle_t* part, int x, int y);**
+**void add_particle_to_grid(particle_t\* part, int x, int y);**
 
-    Adds particle to a cell. Upsizes if there is room to.
+Adds particle to a cell. Upsizes if there is room to.
 
-**void resize_cell(cell_t* cell, bool uord);**
+**void resize_cell(cell_t\* cell, bool uord);**
 
-    Resizes the cell size to either fit more particles or make room for more memory.
+Resizes the cell size to either fit more particles or make room for more memory.
  
-**void update_velocity(particle_t* part);**
+**void update_velocity(particle_t\* part);**
 
-    Updates the velocity of a given particle.
+Updates the velocity of a given particle.
 
-**void debug_vel(particle_t* part);**
+**void debug_vel(particle_t\* part);**
 
-    Prints the velocity and acceleration of one particle. Should only be used if one particle is in the system.
+Prints the velocity and acceleration of one particle. Should only be used if one particle is in the system.
 
-**void reflect_particle_velocity(particle_t* part1, particle_t* part2);**
+**void reflect_particle_velocity(particle_t\* part1, particle_t\* part2);**
 
-    Exchanges velocities of particles when a collision is determined.
+Exchanges velocities of particles when a collision is determined.
 
-**int check_for_room(particle_t* part, int x, int y);**
+**int check_for_room(particle_t\* part, int x, int y);**
 
-    Checks if a specific cell is able to fit a particle. If not, checks if it can be upsized.
+Checks if a specific cell is able to fit a particle. If not, checks if it can be upsized.
 
-**void update_particle_position(particle_t* part);**
+**void update_particle_position(particle_t\* part);**
 
-    Updates the position of a given particle and binds it to the grid width.
+Updates the position of a given particle and binds it to the grid width.
 
-**int init_p(coordinate_t* data, cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]);**
+**int init_p(coordinate_t\* data, cell_t (\*grid)[GRID_WIDTH][GRID_HEIGHT]);**
 
-    Initializes physics system.
+Initializes physics system.
 
 **int add_particles();**
 
-    Allocates memory for each particle in the system.
+Allocates memory for each particle in the system.
 
 **int remove_particle();**
 
-    Frees memory for each particle in the system.
+Frees memory for each particle in the system.
 
 **int close_p();**
 
-    Calls all cleanup functions.
+Calls all cleanup functions.
 
 **void update_p();**
 
-    Function that calls per frame.
+Function that calls per frame.
 
 **float Q_rsqrt(float number);**
 
-    Fast square root function from Quake III.
+Fast square root function from Quake III.
 
 ### Display functions:
 
 **int update_d();**
 
-    Updates display per frame.
+Updates display per frame.
 
-**int init_d(cell_t (*grid)[GRID_WIDTH][GRID_HEIGHT]);**
+**int init_d(cell_t (\*grid)[GRID_WIDTH][GRID_HEIGHT]);**
 
-    Initializes the grid.
+Initializes the grid.
 
 **int close_d();**
 
-    Frees up any initialized data.
+Frees up any initialized data.
 
 **void clear_display();**
 
-    Sets every LED in the display to black.
+Sets every LED in the display to black.
 
 **int init_i(pi_joystick_t\*\* js, pi_i2c_t* gyro, coordinate_t* data);**
 
-    Opens up inputs on the SENSE hat.
+Opens up inputs on the SENSE hat.
 
 **int close_i(pi_joystick_t\*\* js, pi_i2c_t* gyro);**
 
-    Closes inputs on the SENSE hat
+Closes inputs on the SENSE hat
