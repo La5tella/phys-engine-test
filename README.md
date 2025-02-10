@@ -55,12 +55,14 @@ typedef struct {
 
 *vx* and *vy* are velocities.
 
-**Cell:** typedef struct {
+**Cell:** 
+```
+typedef struct {
 	particle_t** particles;
 	int count;
 	int capacity;
 } cell_t;
-
+```
 *particles* is a collection of particles currently in the cell.
 
 *count* is the amount of particles in the cell.
