@@ -43,8 +43,9 @@ int main(){
         update_d();
         update_p();
         getGyroPosition(gyro, &data);
-	pollJoystick(js,handler,1);	
-
+	    //checks if the joystick is being pressed.
+        pollJoystick(js,handler,1);	
+        //pi go eep
         nanosleep(&ts,NULL);
         
         
